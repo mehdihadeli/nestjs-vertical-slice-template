@@ -1,0 +1,59 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Start:Debug",
+      "request": "launch",
+      "runtimeArgs": [
+        "run-script",
+        "start:debug"
+      ],
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "npm",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
+      "name": "Create DB Schema",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeArgs": [
+        "run-script",
+        "schema:sync"
+      ],
+      "runtimeExecutable": "npm",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
+      "name": "Drop DB",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeArgs": [
+        "run-script",
+        "drop:database"
+      ],
+      "runtimeExecutable": "npm",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    }
+  ]
+}
