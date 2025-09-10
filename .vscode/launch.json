@@ -19,7 +19,8 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "type": "node"
+      "type": "node",
+      "sourceMaps": true
     },
     {
       "name": "Create DB Schema",

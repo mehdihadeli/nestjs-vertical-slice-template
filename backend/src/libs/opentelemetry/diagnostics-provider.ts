@@ -1,5 +1,5 @@
 import { AppOptions } from '@libs/configurations/app-options';
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { guard } from '@libs/core/validations/guard';
 import { Context, diag, DiagConsoleLogger, DiagLogLevel, Meter, Span, Tracer } from '@opentelemetry/api';
 import opentelemetry from '@opentelemetry/api';
@@ -10,14 +10,14 @@ export class DiagnosticsProvider {
   public appOptions: AppOptions;
 
   constructor() {
-    this.appOptions = ConfigBinder.getOption<AppOptions>('appOptions');
+    this.appOptions = Configuration.getOption<AppOptions>('appOptions');
     guard.notEmptyOrNull(
       this.appOptions.instrumentationName,
       'instrumentationName',
       'Instrumentation name is required',
     );
 
-    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+    //diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
   }
 
   getInstrumentationName(): string {

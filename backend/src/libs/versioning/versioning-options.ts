@@ -1,4 +1,4 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 
 export enum VersionType {
   HEADER = 'header',
@@ -12,4 +12,4 @@ export class VersioningOptions {
 }
 
 export const getVersioningOptions = (sectionName: string = 'versioningOptions'): VersioningOptions =>
-  ConfigBinder.getOption<VersioningOptions>(sectionName);
+  Configuration.getOption<VersioningOptions>(sectionName);

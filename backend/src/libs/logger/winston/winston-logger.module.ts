@@ -1,24 +1,23 @@
 import { OtelLogger } from '@libs/logger/nest/otel-logger';
 import { WinstonOtelLogger } from '@libs/logger/winston/winston-otel.logger';
-import { OpenTelemetryModule } from '@libs/opentelemetry/opentelemetry.module';
-import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import * as winston from 'winston';
 import { Logger } from 'winston';
 const { combine, timestamp, printf, colorize, prettyPrint } = winston.format;
 
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { LoggerOptions } from '@libs/logger/nest/logger-options';
 
+@Global()
 @Module({
-  imports: [ConfigModule, OpenTelemetryModule],
+  imports: [],
 })
 export class WinstonLoggerModule {
   static forRootAsync(): DynamicModule {
     const winstonProvider: Provider = {
       provide: Logger,
       useFactory: (): Logger => {
-        const loggerOptions = ConfigBinder.getOption<LoggerOptions>('loggerOptions');
+        const loggerOptions = Configuration.getOption<LoggerOptions>('loggerOptions');
 
         return winston.createLogger({
           level: loggerOptions?.level ?? 'info',
@@ -40,7 +39,6 @@ export class WinstonLoggerModule {
 
     return {
       module: WinstonLoggerModule,
-      imports: [ConfigModule],
       providers: [winstonProvider, WinstonOtelLogger, OtelLogger],
       exports: [Logger, WinstonOtelLogger, OtelLogger],
     };

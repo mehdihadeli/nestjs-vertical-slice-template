@@ -1,15 +1,14 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { LoggerOptions } from '@libs/logger/nest/logger-options';
 import { NestOtelLogger } from '@libs/logger/nest/nest-otel-logger';
 import { OtelLogger } from '@libs/logger/nest/otel-logger';
-import { OpenTelemetryModule } from '@libs/opentelemetry/opentelemetry.module';
-import { Logger, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Global, Logger, Module } from '@nestjs/common';
 
 // https://github.com/iamolegga/nestjs-pino#asynchronous-configuration
 // https://docs.nestjs.com/techniques/logger
+@Global()
 @Module({
-  imports: [ConfigModule, OpenTelemetryModule],
+  imports: [],
   providers: [
     // If we supply a custom logger via `app.useLogger()`, it will actually be used by Nest internally. That means
     // that our code remains implementation agnostic (using `Logger` class), while we can easily substitute the default
@@ -20,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
     {
       provide: Logger,
       useFactory: () => {
-        const loggerOptions = ConfigBinder.getOption<LoggerOptions>('loggerOptions');
+        const loggerOptions = Configuration.getOption<LoggerOptions>('loggerOptions');
         const logger = new Logger().localInstance;
         logger.setLogLevels?.([loggerOptions.level ?? 'log']);
 

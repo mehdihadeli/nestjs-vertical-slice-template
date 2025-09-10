@@ -1,10 +1,9 @@
 import { AppOptions } from '@libs/configurations/app-options';
-import { ConfigModule } from '@libs/configurations/config.module';
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { DiagnosticsProvider } from '@libs/opentelemetry/diagnostics-provider';
 import { OpenTelemetryOptions } from '@libs/opentelemetry/open-telemetry-options';
 import { ISpanRunnerToken, SpanRunner } from '@libs/opentelemetry/span-runner';
-import { DynamicModule, Global, Module } from '@nestjs/common';
+import { DynamicModule, Global, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator } from '@opentelemetry/core';
 import { OTLPLogExporter as OTLPGrpcLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
@@ -18,10 +17,13 @@ import { logs, metrics, NodeSDK, tracing } from '@opentelemetry/sdk-node';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
 @Global()
-@Module({ imports: [ConfigModule] })
-export class OpenTelemetryModule {
+@Module({})
+export class OpenTelemetryModule implements OnModuleInit {
+  private static options?: OpenTelemetryOptions;
+  private static isStarted = false;
+
   static forRoot(openTelemetryOptions?: OpenTelemetryOptions): DynamicModule {
-    OpenTelemetryModule.start(openTelemetryOptions);
+    OpenTelemetryModule.options = openTelemetryOptions;
 
     const providers = [
       DiagnosticsProvider,
@@ -42,10 +44,10 @@ export class OpenTelemetryModule {
   }
 
   private static start(openTelemetryOptionsParams?: OpenTelemetryOptions): void {
-    const appOptions = ConfigBinder.getOption<AppOptions>('appOptions');
+    const appOptions = Configuration.getOption<AppOptions>('appOptions');
 
     const openTelemetryOptions =
-      openTelemetryOptionsParams ?? ConfigBinder.getOption<OpenTelemetryOptions>('openTelemetryOptions');
+      openTelemetryOptionsParams ?? Configuration.getOption<OpenTelemetryOptions>('openTelemetryOptions');
 
     // https://opentelemetry.io/docs/languages/js/instrumentation/#initialize-the-sdk
     // Install node SDK
@@ -71,8 +73,8 @@ export class OpenTelemetryModule {
       otelSdk
         .shutdown()
         .then(
-          () => console.log('SDK shut down successfully'),
-          err => console.log('Error shutting down SDK', err),
+          () => Logger.log('SDK shut down successfully'),
+          err => Logger.log('Error shutting down SDK', err),
         )
         .finally(() => process.exit(0));
     });
@@ -208,5 +210,11 @@ export class OpenTelemetryModule {
       );
     }
     return spanProcessors;
+  }
+
+  onModuleInit(): any {
+    if (OpenTelemetryModule.isStarted) return;
+    OpenTelemetryModule.start(OpenTelemetryModule.options);
+    OpenTelemetryModule.isStarted = true;
   }
 }

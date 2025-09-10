@@ -1,27 +1,16 @@
 import { AppOptions } from '@libs/configurations/app-options';
-import { ConfigModule } from '@libs/configurations/config.module';
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { CustomConfigModule } from '@libs/configurations/config-module';
+import { Configuration } from '@libs/configurations/configuration';
 import { ExceptionsModule } from '@libs/exceptions/exceptions.module';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-
-import { ENVIRONMENT } from './constants';
-import { Environment } from './environment';
-
 @Module({
   imports: [
-    ConfigModule.forFeature(ConfigBinder.addOptions<AppOptions>('appOptions')),
+    CustomConfigModule.forFeature(Configuration.addOptions<AppOptions>('appOptions')),
     CqrsModule.forRoot(),
     ExceptionsModule,
   ],
-  providers: [
-    {
-      provide: ENVIRONMENT,
-      useValue: (Object.values(Environment) as string[]).includes(process.env.NODE_ENV ?? '')
-        ? (process.env.NODE_ENV as Environment)
-        : Environment.Development,
-    },
-  ],
+  providers: [],
 
   exports: [
     // Re-export CqrsModule

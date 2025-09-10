@@ -1,4 +1,4 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { registerAs } from '@nestjs/config';
 
 export class CorsOptions {
@@ -9,7 +9,7 @@ export class CorsOptions {
 }
 
 export const addCorsOptions = (sectionName: string = 'corsOptions') =>
-  registerAs(sectionName, (): CorsOptions => ConfigBinder.getOption<CorsOptions>(sectionName))();
+  registerAs(sectionName, (): CorsOptions => Configuration.getOption<CorsOptions>(sectionName))();
 
 export const getCorsOptions = (sectionName: string = 'corsOptions'): CorsOptions =>
-  ConfigBinder.getOption<CorsOptions>(sectionName);
+  Configuration.getOption<CorsOptions>(sectionName);

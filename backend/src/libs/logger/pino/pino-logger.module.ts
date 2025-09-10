@@ -1,17 +1,16 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { LoggerOptions } from '@libs/logger/nest/logger-options';
 import { OtelLogger } from '@libs/logger/nest/otel-logger';
-import { OpenTelemetryModule } from '@libs/opentelemetry/opentelemetry.module';
-import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 import { LoggerModule as NestjsPinoLoggerModule } from 'nestjs-pino';
 import { Params } from 'nestjs-pino/params';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PinoOtelLogger } from './pino-otel.logger';
 
+@Global()
 @Module({
-  imports: [ConfigModule, OpenTelemetryModule],
+  imports: [],
 })
 export class PinoLoggerModule {
   static forRootAsync(): DynamicModule {
@@ -22,9 +21,8 @@ export class PinoLoggerModule {
         // https://docs.nestjs.com/modules#dynamic-modules
         // https://docs.nestjs.com/fundamentals/dynamic-modules
         NestjsPinoLoggerModule.forRootAsync({
-          imports: [ConfigModule],
           useFactory: (): Params => {
-            const loggerOptions = ConfigBinder.getOption<LoggerOptions>('loggerOptions');
+            const loggerOptions = Configuration.getOption<LoggerOptions>('loggerOptions');
 
             return {
               pinoHttp: {

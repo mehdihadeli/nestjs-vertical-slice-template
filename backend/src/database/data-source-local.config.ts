@@ -1,16 +1,14 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
-import { ConfigLoader } from '@libs/configurations/config-loader';
+import { Configuration } from '@libs/configurations/configuration';
 import { PostgresOptions } from '@libs/postgres-typeorm/postgres-options';
 import { AuditSubscriber } from '@libs/postgres-typeorm/subscribers/audit.subscriber';
-import { SoftDeleteSubscriber } from '@libs/postgres-typeorm/subscribers/soft-delete.subscriber';
+import { IdGenerationSubscriber } from '@libs/postgres-typeorm/subscribers/id-generation.subscriber';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 
 // https://www.thisdot.co/blog/setting-up-typeorm-migrations-in-an-nx-nestjs-project
 // https://blog.mazedul.dev/how-to-setup-typeorm-migrations-in-a-nestjs-project
 // because we don't have `ConfigModule` we should `init` ConfigLoader manually.
-ConfigLoader.init();
-const postgresOptions = ConfigBinder.getOption<PostgresOptions>('postgresOptions');
+const postgresOptions = Configuration.getOption<PostgresOptions>('postgresOptions');
 
 console.log('ConnectionString is: ', postgresOptions.connectionString);
 
@@ -24,10 +22,11 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   password: url.password,
   database: url.pathname.replace('/', ''),
   ssl: url.searchParams.get('ssl') === 'true' || undefined,
-  synchronize: postgresOptions.synchronize ?? false,
+  synchronize: true,
+  migrationsRun: true,
   entities: ['dist/src/app/**/*.schema.js'],
   migrations: ['dist/src/database/migrations/*.js'],
-  subscribers: [AuditSubscriber, SoftDeleteSubscriber],
+  subscribers: [AuditSubscriber, IdGenerationSubscriber],
 
   // typeorm-extension
   seeds: ['dist/src/database/seeds/**/*.js'],

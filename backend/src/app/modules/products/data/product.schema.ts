@@ -1,4 +1,5 @@
 import { EntitySchema } from 'typeorm';
+
 import { Product } from '../entities/product.entity';
 
 export const ProductSchema = new EntitySchema<Product>({
@@ -9,7 +10,6 @@ export const ProductSchema = new EntitySchema<Product>({
     id: {
       type: 'uuid',
       primary: true,
-      generated: 'uuid',
       name: 'id',
     },
     name: {
@@ -75,6 +75,9 @@ export const ProductSchema = new EntitySchema<Product>({
       type: Date,
       nullable: true,
       name: 'deleted_at',
+      // https://tripss.github.io/nestjs-query/docs/persistence/typeorm/soft-delete/
+      // handling soft delete
+      deleteDate: true,
     },
   },
 });

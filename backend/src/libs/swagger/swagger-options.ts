@@ -1,4 +1,4 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 
 export class SwaggerOptions {
   title: string;
@@ -13,4 +13,4 @@ export class SwaggerOptions {
 }
 
 export const getSwaggerOptions = (sectionName: string = 'swaggerOptions'): SwaggerOptions =>
-  ConfigBinder.getOption<SwaggerOptions>(sectionName);
+  Configuration.getOption<SwaggerOptions>(sectionName);

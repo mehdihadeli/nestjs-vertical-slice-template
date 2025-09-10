@@ -1,73 +1,58 @@
-import { ConfigBinder } from '@libs/configurations/config-binder';
+import { Configuration } from '@libs/configurations/configuration';
 import { guard } from '@libs/core/validations/guard';
 import { DatabaseSeeder } from '@libs/postgres-typeorm/data-seeder.worker';
+import { MigrationWorker } from '@libs/postgres-typeorm/migration-worker';
 import { AuditSubscriber } from '@libs/postgres-typeorm/subscribers/audit.subscriber';
-import { SoftDeleteSubscriber } from '@libs/postgres-typeorm/subscribers/soft-delete.subscriber';
-import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { IdGenerationSubscriber } from '@libs/postgres-typeorm/subscribers/id-generation.subscriber';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 
-import { PostgresAsyncOptions, PostgresOptions } from './postgres-options';
+import { PostgresOptions } from './postgres-options';
 
-@Module({ imports: [ConfigModule] })
+@Module({})
 export class PostgresTypeormModule {
+  static logger = new Logger(PostgresTypeormModule.name);
+
   // https://docs.nestjs.com/modules#dynamic-modules
   // https://docs.nestjs.com/fundamentals/dynamic-modules
   // https://github.com/nestjs/typeorm/blob/master/lib/typeorm-core.module.ts#L82
   // https://github.com/nestjs/typeorm/blob/master/lib/typeorm-core.module.ts#L46
-  static forRoot(postgresOptions?: PostgresOptions): DynamicModule {
-    // `TypeOrmCoreModule` is global and create by `forRootAsync` and `forRoot` but `TypeOrmModule` itself is not global
-
-    const configOptions = ConfigBinder.getOption<PostgresOptions>('postgresOptions');
-
-    const mergedOptions = Object.assign({}, configOptions);
-    if (postgresOptions) {
-      for (const key of Object.keys(postgresOptions)) {
-        const value: any = postgresOptions[key];
-        if (value !== undefined && value !== null) {
-          mergedOptions[key] = value;
-        }
-      }
-    }
-
-    const typeOrmModuleOptions = PostgresTypeormModule.createTypeOrmModuleOptions(mergedOptions);
-
-    const typeOrmCoreModule = TypeOrmModule.forRoot(typeOrmModuleOptions);
-
-    const exports = [typeOrmCoreModule];
-    const imports = [typeOrmCoreModule];
-
-    return {
-      module: PostgresTypeormModule,
-      imports,
-      exports,
-      providers: [DatabaseSeeder],
-    };
-  }
-
-  static forRootAsync(asyncOptions: PostgresAsyncOptions): DynamicModule {
+  static forRootAsync(postgresOptions?: PostgresOptions): DynamicModule {
+    // it is better we defer reading configs using `forRootAsync` for more flexibility to change options until runtime,
+    // otherwise whenever we import AppModules all imported child modules will load immediately and don't have
+    // flexibility of overriding options in test
     const typeOrmModule = TypeOrmModule.forRootAsync({
-      imports: asyncOptions.imports ?? [],
-      inject: asyncOptions.inject ?? [],
-      useFactory: asyncOptions.useFactory
-        ? async (...args: any[]): Promise<TypeOrmModuleOptions> => {
-            const options = await asyncOptions.useFactory!(args);
-            return PostgresTypeormModule.createTypeOrmModuleOptions(options);
+      useFactory: () => {
+        const configOptions = Configuration.getOption<PostgresOptions>('postgresOptions');
+
+        const mergedOptions = Object.assign({}, configOptions);
+        if (postgresOptions) {
+          for (const key of Object.keys(postgresOptions)) {
+            const value: any = postgresOptions[key];
+            if (value !== undefined && value !== null) {
+              mergedOptions[key] = value;
+            }
           }
-        : undefined,
+        }
+        const res = PostgresTypeormModule.createTypeOrmModuleOptions(mergedOptions);
+
+        return res;
+      },
     });
 
-    const exports = [typeOrmModule];
-    const imports = [typeOrmModule, ...(asyncOptions.imports ?? [])];
-
     return {
       module: PostgresTypeormModule,
-      imports,
-      exports,
-      providers: [DatabaseSeeder],
+      imports: [typeOrmModule],
+      exports: [typeOrmModule],
+      providers: [
+        // - Make sure DatabaseSeeder and MigrationWorker provider so they can have lifecycle hooks, the same if we
+        // want to have PostgresTypeormModule as a life cycle hook
+        DatabaseSeeder,
+        MigrationWorker,
+      ],
     };
   }
 
@@ -81,16 +66,22 @@ export class PostgresTypeormModule {
   private static createTypeOrmModuleOptions(options: PostgresOptions): TypeOrmModuleOptions & SeederOptions {
     guard.notNull(options, 'postgresOptions');
 
+    const migrationsPath = ['dist/src/database/migrations/*.js'];
+    const entitiesPath = ['dist/src/app/**/*.schema.js'];
+
+    const seedsPath = ['dist/src/database/seeds/**/*.js'];
+    const factoriesPath = ['dist/src/database/factories/**/*.js'];
+
     // Use in-memory SQLite if specified
     if (options.useInMemory) {
       return {
         type: 'sqlite',
         database: ':memory:',
-        synchronize: options.synchronize ?? true,
         logging: options.logging ?? true,
         migrations: options.migrations,
-        migrationsRun: options.migrationsRun,
-        subscribers: [AuditSubscriber, SoftDeleteSubscriber],
+        subscribers: [AuditSubscriber, IdGenerationSubscriber],
+        seeds: options.seeds ?? seedsPath,
+        factories: options.factories ?? factoriesPath,
       };
     }
 
@@ -103,13 +94,7 @@ export class PostgresTypeormModule {
 
     const url = new URL(options.connectionString);
 
-    const migrationsPath = ['dist/src/database/migrations/*.js'];
-    const entitiesPath = ['dist/src/app/**/*.schema.js'];
-
-    const seedsPath = ['dist/src/database/seeds/**/*.js'];
-    const factoriesPath = ['dist/src/database/factories/**/*.js'];
-
-    return {
+    const dataSourceOptions: DataSourceOptions & SeederOptions = {
       type: 'postgres',
       host: url.hostname,
       port: parseInt(url.port) || 5432,
@@ -117,16 +102,20 @@ export class PostgresTypeormModule {
       password: url.password,
       database: url.pathname.replace('/', ''),
       ssl: url.searchParams.get('ssl') === 'true' || undefined,
-      synchronize: options.synchronize ?? false, // Default to false for production safety
       logging: options.logging ?? false,
-      migrationsRun: options.migrationsRun ?? process.env.NODE_ENV === 'development',
-      subscribers: [AuditSubscriber, SoftDeleteSubscriber],
+      subscribers: [AuditSubscriber, IdGenerationSubscriber],
       migrations: options.migrations ?? migrationsPath,
       entities: options.entities ?? entitiesPath,
 
-      // // https://github.com/tada5hi/typeorm-extension
+      // we will apply migrations manually
+      migrationsRun: false,
+      synchronize: false,
+
+      // https://github.com/tada5hi/typeorm-extension
       seeds: options.seeds ?? seedsPath,
       factories: options.factories ?? factoriesPath,
     };
+
+    return dataSourceOptions;
   }
 }

@@ -5,25 +5,16 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export class ConfigLoader {
-  private static configItems: Record<string, any> = {};
-
-  static init(): void {
-    const env = process.env.NODE_ENV ?? 'development';
-
-    let envVars = this.initEnvs(env);
-    const appsettings = this.loadAppSettings(env);
-
-    // Parse envs into a nested object structure (NET style __ mapping)
-    envVars = this.parseEnvToNested(envVars);
-
-    // Merge env over appsettings (env wins, supports deeply nested objects)
-    ConfigLoader.configItems = this.deepMerge(appsettings, envVars);
-  }
+  private static configItems: Record<string, any> | null = null;
 
   /**
    * Binds a config section using `:` notation, e.g. 'openTelemetryOptions:aspireDashboardOTLPOptions'
    */
   static bindSection<T>(sectionPath: string): T | null {
+    if (!ConfigLoader.configItems) {
+      ConfigLoader.init();
+    }
+
     const sections = sectionPath.split(':');
     let current = ConfigLoader.configItems;
     for (const section of sections) {
@@ -34,6 +25,19 @@ export class ConfigLoader {
       }
     }
     return current as T;
+  }
+
+  private static init(): void {
+    const env = process.env.NODE_ENV ?? 'development';
+
+    let envVars = this.initEnvs(env);
+    const appsettings = this.loadAppSettings(env);
+
+    // Parse envs into a nested object structure (NET style __ mapping)
+    envVars = this.parseEnvToNested(envVars);
+
+    // Merge env over appsettings (env wins, supports deeply nested objects)
+    ConfigLoader.configItems = this.deepMerge(appsettings, envVars);
   }
 
   /**
@@ -218,8 +222,8 @@ export class ConfigLoader {
         .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2') // insert _ between sequences like "APIKey" => "API_Key"
         .toUpperCase();
     }
-    const snakeCaseParts = camelToSnakeUpper(key);
-    return snakeCaseParts;
+
+    return camelToSnakeUpper(key);
   }
 
   /**

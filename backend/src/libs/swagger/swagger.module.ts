@@ -28,13 +28,12 @@ export class SwaggerModule {
 
       const document = NestJsSwaggerModule.createDocument(app, config, {
         include: includeModules ?? [],
+        ignoreGlobalPrefix: false,
       });
 
       const versionPath = `${version}/${swaggerOptions.path ?? 'swagger'}`;
 
-      NestJsSwaggerModule.setup(versionPath, app, document, {
-        jsonDocumentUrl: `${version}/swagger.json`,
-      });
+      NestJsSwaggerModule.setup(versionPath, app, document);
     });
 
     app.use((req: Request, res: Response, next: NextFunction): void => {

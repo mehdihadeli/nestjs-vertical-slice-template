@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.x",
+    "pnpm": ">=10.x"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "install-dev-cert-bash": "curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v vs2019 -l ~/vsdbg"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "cspell": "^8.14.2",
+    "husky": "^9.1.6"
+  }
+}

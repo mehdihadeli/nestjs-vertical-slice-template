@@ -101,7 +101,7 @@ export default tseslint.config(
           selector: ['typeLike'],
           format: ['PascalCase'],
         },
-        // Constants in .constants.ts files must be SCREAMING_SNAKE_CASE
+        // Constants in .products.tokens.ts files must be SCREAMING_SNAKE_CASE
         {
           selector: 'variable',
           modifiers: ['const', 'exported'],
@@ -167,13 +167,18 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+
       'vitest/expect-expect': 'off',
       'vitest/no-standalone-expect': 'off',
+
+      'no-console': 'off',
     },
   },
   {
     // Extra strict rules for constant files
-    files: ['**/*.constants.ts', '**/*.constant.ts'],
+    files: ['**/*.products.tokens.ts', '**/*.constant.ts'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',
