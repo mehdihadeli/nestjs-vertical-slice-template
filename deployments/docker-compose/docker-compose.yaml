@@ -1,4 +1,4 @@
-name: food-application-infrastructure
+name: nestjs-vertical-slice-template-infrastructure
 
 services:
   postgres:
