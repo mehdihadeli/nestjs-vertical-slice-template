@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 export class FakeProduct {
   static generate(overrides: Partial<Product> = {}): Product {
     return {
-      id: overrides.id ?? faker.string.uuid(),
+      id: overrides.id ?? '',
       name: overrides.name ?? faker.commerce.productName(),
       price: overrides.price ?? parseFloat(faker.commerce.price({ min: 1, max: 1000, dec: 2 })),
       sku: overrides.sku ?? faker.commerce.isbn(),
@@ -13,7 +13,7 @@ export class FakeProduct {
       createdBy: overrides.createdBy ?? faker.string.uuid(),
       lastModifiedAt: overrides.lastModifiedAt ?? undefined,
       lastModifiedBy: overrides.lastModifiedBy ?? undefined,
-      version: overrides.version ?? 1,
+      version: overrides.version ?? 0,
       deletedAt: overrides.deletedAt ?? undefined,
       isDeleted: overrides.isDeleted ?? false,
     };

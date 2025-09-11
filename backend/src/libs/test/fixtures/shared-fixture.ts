@@ -1,11 +1,11 @@
 import { AppModule } from '@app/app.module';
+import { ProblemDetails } from '@libs/core/exceptions/problem-details';
 import {
   DefaultTestAppInfrastructureBootstrapper,
   TestAppInfrastructureBootstrapper,
 } from '@libs/test/test-app-bootstrapper';
 import { INestApplication, Logger } from '@nestjs/common';
-import { TestingModule, TestingModuleBuilder } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { TestingLogger } from '@nestjs/testing/services/testing-logger.service';
 
 import { PostgresContainerFixture } from './postgres-fixture';
@@ -47,6 +47,23 @@ export class SharedFixture {
     await this.app?.init();
 
     console.log('✅ Test app initialized with selected testAppInfrastructureBootstrapper');
+  }
+
+  /**
+   * Helper to validate ProblemDetails response
+   */
+  public assertProblemDetails(body: any, expectedStatus: number, detail?: string, title?: string, type?: string): void {
+    const { type: actualType, title: actualTitle, status, detail: actualDetail } = body as ProblemDetails;
+
+    expect(body).toBeDefined();
+    expect(actualType).toBeDefined();
+    expect(actualTitle).toBeDefined();
+    expect(status).toBe(expectedStatus);
+    expect(actualDetail).toBeDefined();
+
+    if (detail) expect(actualDetail).toContain(detail);
+    if (title) expect(actualTitle).toContain(title);
+    if (type) expect(actualType).toContain(type);
   }
 
   public async cleanup(): Promise<void> {

@@ -161,7 +161,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/**'],
+    files: ['test/**'],
     plugins: {
       vitest: eslintPluginVitest.default,
     },

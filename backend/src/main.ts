@@ -24,7 +24,7 @@ const bootstrap = async (): Promise<void> => {
 bootstrap().catch(handleError);
 
 function handleError(error: any): void {
-  console.error(`⚠️ Application failed to start: ${error}`);
+  Logger.error(`⚠️ Application failed to start: ${error}`);
   process.exit(1);
 }
 

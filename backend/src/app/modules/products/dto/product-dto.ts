@@ -18,4 +18,13 @@ export class ProductDto {
 
   @ApiProperty({ example: '2024-01-01T00:00:00Z', description: 'Creation date' })
   createdAt: Date;
+
+  constructor(id: string, name: string, price: number, sku: string, createdAt: Date, description?: string | null) {
+    this.id = id;
+    this.name = name;
+    this.price = price;
+    this.sku = sku;
+    this.createdAt = createdAt;
+    this.description = description ?? null;
+  }
 }

@@ -1,6 +1,9 @@
 import { AppOptions } from '@libs/configurations/app-options';
 import { Configuration } from '@libs/configurations/configuration';
+import { DependencyValidatorService } from '@libs/opentelemetry/dependency-validator.service';
 import { DiagnosticsProvider } from '@libs/opentelemetry/diagnostics-provider';
+import { ApplicationOtelLogger } from '@libs/opentelemetry/loggers/application-otel-logger';
+import { OtelLogger } from '@libs/opentelemetry/loggers/otel-logger';
 import { OpenTelemetryOptions } from '@libs/opentelemetry/open-telemetry-options';
 import { ISpanRunnerToken, SpanRunner } from '@libs/opentelemetry/span-runner';
 import { DynamicModule, Global, Logger, Module, OnModuleInit } from '@nestjs/common';
@@ -26,14 +29,17 @@ export class OpenTelemetryModule implements OnModuleInit {
     OpenTelemetryModule.options = openTelemetryOptions;
 
     const providers = [
+      DependencyValidatorService,
       DiagnosticsProvider,
       {
         provide: ISpanRunnerToken,
         useClass: SpanRunner,
       },
+      OtelLogger,
+      ApplicationOtelLogger,
     ];
 
-    const exports = [ISpanRunnerToken, DiagnosticsProvider];
+    const exports = [ISpanRunnerToken, DiagnosticsProvider, ApplicationOtelLogger, OtelLogger];
 
     return {
       module: OpenTelemetryModule,

@@ -1,11 +1,11 @@
-import { OtelLogger } from '@libs/logger/nest/otel-logger';
-import { WinstonOtelLogger } from '@libs/logger/winston/winston-otel.logger';
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import * as winston from 'winston';
 import { Logger } from 'winston';
 const { combine, timestamp, printf, colorize, prettyPrint } = winston.format;
 
 import { Configuration } from '@libs/configurations/configuration';
+import { DependencyValidatorService } from '@libs/logger/dependency-validator.service';
+import { LOGGER_PROVIDER_TOKEN } from '@libs/logger/logger.tokens';
 import { LoggerOptions } from '@libs/logger/nest/logger-options';
 
 @Global()
@@ -39,8 +39,15 @@ export class WinstonLoggerModule {
 
     return {
       module: WinstonLoggerModule,
-      providers: [winstonProvider, WinstonOtelLogger, OtelLogger],
-      exports: [Logger, WinstonOtelLogger, OtelLogger],
+      providers: [
+        winstonProvider,
+        {
+          provide: LOGGER_PROVIDER_TOKEN,
+          useExisting: Logger,
+        },
+        DependencyValidatorService,
+      ],
+      exports: [Logger, LOGGER_PROVIDER_TOKEN],
     };
   }
 }

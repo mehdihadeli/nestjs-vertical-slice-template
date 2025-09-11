@@ -29,9 +29,7 @@
                 "tests/*"
             ]
         },
-        "types": [
-            "vitest/globals"
-        ],
+        "types": ["node", "jest", "vitest", "supertest"],
         "incremental": true,
         "skipLibCheck": true,
         "strictNullChecks": true,

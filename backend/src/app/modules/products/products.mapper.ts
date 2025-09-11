@@ -14,13 +14,6 @@ export class ProductsMapper {
     );
   }
   static productToProductDto(entity: Product): ProductDto {
-    return {
-      id: entity.id,
-      name: entity.name,
-      price: entity.price,
-      sku: entity.sku,
-      description: entity.description || undefined,
-      createdAt: entity.createdAt,
-    };
+    return new ProductDto(entity.id, entity.name, entity.price, entity.sku, entity.createdAt, entity.description);
   }
 }

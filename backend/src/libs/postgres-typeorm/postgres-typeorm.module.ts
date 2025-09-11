@@ -1,6 +1,7 @@
 import { Configuration } from '@libs/configurations/configuration';
 import { guard } from '@libs/core/validations/guard';
 import { DatabaseSeeder } from '@libs/postgres-typeorm/data-seeder.worker';
+import { DependencyValidatorService } from '@libs/postgres-typeorm/dependency-validator.service';
 import { MigrationWorker } from '@libs/postgres-typeorm/migration-worker';
 import { AuditSubscriber } from '@libs/postgres-typeorm/subscribers/audit.subscriber';
 import { IdGenerationSubscriber } from '@libs/postgres-typeorm/subscribers/id-generation.subscriber';
@@ -52,6 +53,7 @@ export class PostgresTypeormModule {
         // want to have PostgresTypeormModule as a life cycle hook
         DatabaseSeeder,
         MigrationWorker,
+        DependencyValidatorService,
       ],
     };
   }

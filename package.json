@@ -6,7 +6,12 @@
   },
   "scripts": {
     "prepare": "husky",
-    "install-dev-cert-bash": "curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v vs2019 -l ~/vsdbg"
+    "install-dev-cert-bash": "curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v vs2019 -l ~/vsdbg",
+    "dev": "concurrently \"pnpm:dev:backend\" \"pnpm:dev:frontend\"",
+    "dev:backend": "cd backend && pnpm run start:dev",
+    "debug:backend": "cd backend && pnpm run start:debug",
+    "dev:frontend": "cd apps/frontend && pnpm run dev",
+    "debug:frontend": "cd apps/frontend && pnpm run debug"
   },
   "author": "",
   "license": "MIT",
@@ -15,5 +20,8 @@
     "@commitlint/config-conventional": "^19.7.1",
     "cspell": "^8.14.2",
     "husky": "^9.1.6"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
   }
 }

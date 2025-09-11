@@ -31,7 +31,7 @@ describe('CreateProductHandler (Integration)', () => {
     it('should create product successfully and return result', async () => {
       // Arrange
       const fake = FakeProduct.generate();
-      const command = new CreateProduct(fake.name, fake.price, fake.sku, fake.description);
+      const command = CreateProduct.of(fake.name, fake.price, fake.sku, fake.description);
 
       // Act
       const result = await commandBus.execute<CreateProduct, CreateProductResult>(command);
@@ -51,7 +51,7 @@ describe('CreateProductHandler (Integration)', () => {
     it('should throw ConflictException', async () => {
       // Arrange
       const existing = FakeProduct.generate();
-      const firstCommand = new CreateProduct(existing.name, existing.price, existing.sku, existing.description);
+      const firstCommand = CreateProduct.of(existing.name, existing.price, existing.sku, existing.description);
 
       await commandBus.execute(firstCommand);
 

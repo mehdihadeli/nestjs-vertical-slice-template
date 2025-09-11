@@ -20,7 +20,7 @@ export class CreateProduct implements ICommand {
     name: string | undefined,
     price: number | undefined,
     sku: string | undefined,
-    description?: string,
+    description?: string | null,
   ): CreateProduct {
     const validatedName = Guard.notNullOrWhiteSpace(name, 'name', 'Product name is required.');
     const validatedPrice = Guard.notNegativeOrZero(price, 'price', 'Price must be greater than zero.');

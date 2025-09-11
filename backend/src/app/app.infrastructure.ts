@@ -1,7 +1,7 @@
 import { AppOptions } from '@libs/configurations/app-options';
 import { Configuration } from '@libs/configurations/configuration';
 import { Guard } from '@libs/core/validations/guard';
-import { PinoOtelLogger } from '@libs/logger/pino/pino-otel.logger';
+import { ApplicationOtelLogger } from '@libs/opentelemetry/loggers/application-otel-logger';
 import { SwaggerModule } from '@libs/swagger/swagger.module';
 import { VersioningModule } from '@libs/versioning/versioning.module';
 import { corsMiddleware } from '@libs/web/cors/cors.middleware';
@@ -17,7 +17,7 @@ import helmet from 'helmet';
 export class AppInfrastructure {
   static setup(app: INestApplication): void {
     const configService = app.get(ConfigService);
-    const logger = app.get(PinoOtelLogger);
+    const logger = app.get(ApplicationOtelLogger);
 
     const appOptions = Configuration.getOption<AppOptions>('appOptions');
 

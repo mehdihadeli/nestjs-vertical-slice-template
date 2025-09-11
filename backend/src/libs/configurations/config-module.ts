@@ -28,17 +28,10 @@ export class CustomConfigModule {
   static forFeature(config: ConfigFactory): DynamicModule {
     const nestFeatureModule = NestConfigModule.forFeature(config);
 
-    const env: Environment = (process.env.NODE_ENV as Environment) ?? Environment.Development;
     return {
       module: CustomConfigModule,
-      providers: [
-        {
-          provide: ENVIRONMENT_TOKEN,
-          useValue: env,
-        },
-      ],
       imports: [nestFeatureModule],
-      exports: [nestFeatureModule, ENVIRONMENT_TOKEN],
+      exports: [nestFeatureModule],
     };
   }
 }
