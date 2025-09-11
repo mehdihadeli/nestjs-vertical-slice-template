@@ -6,6 +6,8 @@ import { dirname } from 'path';
 import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'url';
 import unicorn from 'eslint-plugin-unicorn';
+import prettierPlugin from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const eslintPluginVitest = await import('eslint-plugin-vitest');
@@ -23,6 +25,8 @@ export default tseslint.config(
     ],
   },
   eslint.configs.recommended,
+  // disables ESLint rules that conflict with Prettier
+  prettierConfig,
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
   {
@@ -49,9 +53,13 @@ export default tseslint.config(
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
+      prettier: prettierPlugin,
       unicorn,
     },
     rules: {
+      // enforce Prettier formatting
+      'prettier/prettier': 'error',
+
       // Import rules
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
@@ -138,6 +146,11 @@ export default tseslint.config(
         'error',
         {
           code: 120,
+          ignoreUrls: true,
+          ignoreComments: false,
+          ignoreRegExpLiterals: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
         },
       ],
       'new-parens': 'error',

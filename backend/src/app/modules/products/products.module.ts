@@ -6,7 +6,6 @@ import { GetProductByIdController } from '@app/modules/products/features/getting
 import { GetProductsByPageHandler } from '@app/modules/products/features/getting-products/get-products-by-page';
 import { GetProductsByPageController } from '@app/modules/products/features/getting-products/get-products-by-page-controller';
 import { PRODUCT_REPOSITORY_TOKEN } from '@app/modules/products/products.tokens';
-import { SharedModule } from '@app/modules/shared/shared.module';
 import { PostgresTypeormModule } from '@libs/postgres-typeorm/postgres-typeorm.module';
 import { Module } from '@nestjs/common';
 
