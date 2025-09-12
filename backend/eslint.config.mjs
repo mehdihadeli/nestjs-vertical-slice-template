@@ -1,15 +1,10 @@
 import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
-import { dirname } from 'path';
-import tseslint from 'typescript-eslint';
-import { fileURLToPath } from 'url';
 import unicorn from 'eslint-plugin-unicorn';
-import prettierPlugin from 'eslint-plugin-prettier';
-import prettierConfig from 'eslint-config-prettier';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const eslintPluginVitest = await import('eslint-plugin-vitest');
 
 export default tseslint.config(
@@ -21,45 +16,36 @@ export default tseslint.config(
       '**/*.json',
       '**/*.md',
       'eslint.config.mjs',
-      '!src/**/*', // Include src folder
+      'prettier.config.js',
+      'lint-staged.config.mjs',
     ],
   },
   eslint.configs.recommended,
-  // disables ESLint rules that conflict with Prettier
-  prettierConfig,
-  ...tseslint.configs.recommendedTypeChecked,
+  tseslint.configs.recommendedTypeChecked,
+  // https://github.com/prettier/eslint-plugin-prettier?tab=readme-ov-file#configuration-new-eslintconfigjs
   eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.vitest,
+        ...globals.jest,
       },
       ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
-        project: 'tsconfig.json',
-        tsconfigRootDir: __dirname,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
-    },
-  },
-  {
-    files: ['*.js', '*.mjs', '*.cjs'],
-    ...tseslint.configs.disableTypeChecked,
-    rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
-      prettier: prettierPlugin,
       unicorn,
     },
+  },
+  {
     rules: {
-      // enforce Prettier formatting
-      'prettier/prettier': 'error',
-
       // Import rules
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',

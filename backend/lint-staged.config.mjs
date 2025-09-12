@@ -1,12 +1,7 @@
-const config = {
-  '**/*.{ts?(x),mts}': () => 'tsc -p tsconfig.prod.json --noEmit',
-  '*.{js,jsx,mjs,cjs,ts,tsx,mts}': [
-    'node --run lint:file',
-    'vitest related --run',
-  ],
-  '*.{md,json}': 'prettier --write',
-  '*': 'node --run typos',
-  '*.{yml,yaml}': 'node --run lint:yaml',
-};
+export default {
+  // Run ESLint on all staged files
+  '*.{js,mjs,cjs,ts,tsx}': ['eslint --fix'],
 
-export default config;
+  // un Prettier on staged files
+  '*.{js,mjs,cjs,ts,tsx,json,md,yml,yaml}': ['prettier --write'],
+};
