@@ -11,7 +11,6 @@ import { Substitute, SubstituteOf } from '@fluffy-spoon/substitute';
 import { ValidationException } from '@libs/core/validations/validation-exception';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FakeProduct } from '../../../../shared/fakes/fake-porduct';
 

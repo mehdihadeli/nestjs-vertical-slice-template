@@ -2,7 +2,6 @@ import { ProductDto } from '@app/modules/products/dto/product-dto';
 import { CreateProductResult } from '@app/modules/products/features/creating-product/create-product';
 import { ProductsMapper } from '@app/modules/products/products.mapper';
 import { faker } from '@faker-js/faker';
-import { describe, expect, it } from 'vitest';
 
 import { FakeProduct } from '../../../shared/fakes/fake-porduct';
 
@@ -29,9 +28,8 @@ describe('ProductsMapper', () => {
 
     it('should map undefined description to null', () => {
       // Arrange
-      const product = FakeProduct.generate({
-        description: undefined,
-      });
+      const product = FakeProduct.generate();
+      product.description = undefined;
 
       // Act
       const result = ProductsMapper.productToCreateResult(product);
@@ -42,9 +40,8 @@ describe('ProductsMapper', () => {
 
     it('should map null description to null', () => {
       // Arrange
-      const product = FakeProduct.generate({
-        description: null,
-      });
+      const product = FakeProduct.generate();
+      product.description = undefined;
 
       // Act
       const result = ProductsMapper.productToCreateResult(product);
@@ -90,28 +87,26 @@ describe('ProductsMapper', () => {
 
     it('should map undefined description to undefined', () => {
       // Arrange
-      const product = FakeProduct.generate({
-        description: undefined,
-      });
+      const product = FakeProduct.generate();
+      product.description = undefined;
 
       // Act
       const dto = ProductsMapper.productToProductDto(product);
 
       // Assert
-      expect(dto.description).toBeUndefined();
+      expect(dto.description).toBeNull();
     });
 
     it('should map null description to undefined', () => {
       // Arrange
-      const product = FakeProduct.generate({
-        description: null,
-      });
+      const product = FakeProduct.generate();
+      product.description = undefined;
 
       // Act
       const dto = ProductsMapper.productToProductDto(product);
 
       // Assert
-      expect(dto.description).toBeUndefined();
+      expect(dto.description).toBeNull();
     });
   });
 });

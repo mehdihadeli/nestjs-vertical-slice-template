@@ -8,7 +8,6 @@ import { PRODUCT_REPOSITORY_TOKEN } from '@app/modules/products/products.tokens'
 import { Substitute, SubstituteOf } from '@fluffy-spoon/substitute';
 import { ValidationException } from '@libs/core/validations/validation-exception';
 import { Test, TestingModule } from '@nestjs/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FakeProduct } from '../../../../shared/fakes/fake-porduct';
 
