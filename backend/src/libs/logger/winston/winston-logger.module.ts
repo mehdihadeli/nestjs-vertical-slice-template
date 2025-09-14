@@ -1,12 +1,12 @@
-import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
-import * as winston from 'winston';
-import { Logger } from 'winston';
-const { combine, timestamp, printf, colorize, prettyPrint } = winston.format;
-
 import { Configuration } from '@libs/configurations/configuration';
 import { DependencyValidatorService } from '@libs/logger/dependency-validator.service';
 import { LOGGER_PROVIDER_TOKEN } from '@libs/logger/logger.tokens';
 import { LoggerOptions } from '@libs/logger/nest/logger-options';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import * as winston from 'winston';
+import { Logger } from 'winston';
+
+const { combine, timestamp, printf, colorize, prettyPrint } = winston.format;
 
 @Global()
 @Module({
@@ -30,6 +30,7 @@ export class WinstonLoggerModule {
             prettyPrint({
               depth: 5,
             }),
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             printf(info => `[${info.timestamp}] ${info.level}: ${info.message}`),
           ),
           transports: [new winston.transports.Console()],

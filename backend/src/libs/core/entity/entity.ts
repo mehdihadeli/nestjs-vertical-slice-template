@@ -3,6 +3,5 @@ export abstract class Entity<TId = string> {
 }
 
 export interface ISoftDelete {
-  isDeleted: boolean;
   deletedAt?: Date;
 }

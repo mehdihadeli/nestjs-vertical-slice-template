@@ -1,0 +1,115 @@
+{
+  "name": "Food Nest App",
+  // Use Docker Compose to run Node app + optional services (DB, Redis, etc.)
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  // Features: Install essential tools directly via Dev Container Features
+  "features": {
+    // Node.js (LTS) - Uses nvm under the hood, supports multiple versions
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+
+    // npm/yarn/pnpm - Included with Node, but explicitly ensured
+    "ghcr.io/devcontainers/features/npm:1": {
+      "version": "latest"
+    },
+
+    // Common utilities (zsh, sudo, etc.)
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    },
+
+    // Docker CLI & Docker Compose (if you need to build/run containers from inside)
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  },
+
+  // VS Code settings and extensions tailored for Node.js
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "git.autofetch": true,
+        "files.autoSave": "onFocusChange",
+        "editor.formatOnSave": true,
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "explorer.autoReveal": true,
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.env.linux": {
+          "NODE_ENV": "development"
+        },
+        "javascript.preferences.importModuleSpecifier": "non-relative",
+        "typescript.preferences.importModuleSpecifier": "non-relative",
+        "editor.fontFamily": "'MesloLGM Nerd Font', 'Droid Sans Mono', 'monospace', 'Droid Sans Fallback', 'Consolas'",
+        "editor.fontSize": 14,
+        "explorer.confirmDelete": false,
+        "editor.minimap.enabled": false,
+        "editor.wordWrap": "on",
+        "editor.guides.bracketPairs": true,
+        "explorer.experimental.fileNesting.enabled": true,
+        "workbench.colorTheme": "Visual Studio Light",
+        "workbench.iconTheme": "material-icon-theme",
+        "javascript.validate.enable": true,
+        "typescript.validate.enable": true,
+        "eslint.run": "onSave",
+        "eslint.autoFixOnSave": true,
+        "prettier.enable": true,
+        "prettier.singleQuote": true,
+        "prettier.trailingComma": "all",
+        "prettier.jsxSingleQuote": true,
+        "prettier.semi": false,
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[markdown]": {
+          "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+        }
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "humao.rest-client",
+        "streetsidesoftware.code-spell-checker",
+        "vivaxy.vscode-conventional-commits",
+        "PKief.material-icon-theme",
+        "EditorConfig.EditorConfig",
+        "DavidAnson.vscode-markdownlint",
+        "IBM.output-colorizer",
+        "emmanuelbeziat.vscode-great-icons",
+        "ms-vscode.vs-keybindings",
+        "GitHub.vscode-github-actions",
+        "vscode-icons-team.vscode-icons",
+        "redhat.vscode-yaml",
+        "formulahendry.code-runner"
+      ]
+    }
+  },
+
+  // Resource requirements (adjust as needed)
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb",
+    "storage": "20gb"
+  },
+
+  // Optional: Forward ports commonly used in Node.js apps
+  "forwardPorts": [3000, 5000, 8080, 9000],
+
+  // Lifecycle scripts (optional but recommended)
+  "updateContentCommand": "chmod +x .devcontainer/scripts/update.sh && npm ci",
+  "postCreateCommand": "chmod +x .devcontainer/scripts/post-create.sh && npm run build"
+}

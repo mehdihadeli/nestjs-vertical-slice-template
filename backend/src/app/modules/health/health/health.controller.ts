@@ -1,5 +1,6 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import {
   HealthCheckService,
   MemoryHealthIndicator,
@@ -19,14 +20,15 @@ export class HealthController {
   ) {}
 
   @Get()
+  @ApiExcludeEndpoint()
   async check(): Promise<any> {
     return this.health.check([
-      //() => this.db.pingCheck('database', { timeout: 300 }),
-      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
+      () => this.db.pingCheck('database', { timeout: 300 }),
+      //() => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
       () =>
         this.microservice.pingCheck('food-service', {
           transport: Transport.TCP,
-          options: { host: '127.0.0.1', port: 4000 },
+          options: { host: '127.0.0.1', port: 5000 },
         }),
     ]);
   }

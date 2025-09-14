@@ -10,6 +10,5 @@ export abstract class AuditableEntity<TId = string> extends Entity<TId> {
 }
 
 export abstract class AuditableSoftDeleteEntity<TId = string> extends AuditableEntity<TId> implements ISoftDelete {
-  deletedAt?: Date;
-  isDeleted: boolean;
+  deletedAt?: Date | null;
 }

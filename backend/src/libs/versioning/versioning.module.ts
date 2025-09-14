@@ -1,4 +1,4 @@
-import { VersionType, getVersioningOptions } from '@libs/versioning/versioning-options';
+import { getVersioningOptions, VersionType } from '@libs/versioning/versioning-options';
 import { INestApplication, VERSION_NEUTRAL, VersioningType } from '@nestjs/common';
 
 export class VersioningModule {

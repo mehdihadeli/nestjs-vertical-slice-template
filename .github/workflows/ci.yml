@@ -1,0 +1,81 @@
+name: Backend CI Pipeline
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    precheck:
+        name: 🧹 Lint & Format Check
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🚚 Checkout code
+              uses: actions/checkout@v4
+
+            - name: 🐳 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+
+            - name: 📦 Install pnpm globally
+              run: npm install -g pnpm
+
+            - name: 📦 Install dependencies with pnpm
+              run: pnpm run install:backend
+
+            - name: 🧹 Check ESLint
+              run: pnpm run lint:backend
+
+            - name: 🎨 Check Prettier format
+              run: pnpm run format:check:backend
+
+    build-and-test:
+        name: 🏗️ Build & Test
+        needs: precheck
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🚚 Checkout code
+              uses: actions/checkout@v4
+
+            - name: 🐳 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+
+            - name: 📦 Install pnpm globally
+              run: npm install -g pnpm
+
+            - name: 📦 Restore pnpm cache
+              uses: actions/cache@v3
+              id: pnpm-cache
+              with:
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: 📦 Restore node_modules cache
+              uses: actions/cache@v3
+              id: node-modules-cache
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: 📦 Install dependencies (if not cached)
+              if: steps.pnpm-cache.outputs.cache-hit != 'true' || steps.node-modules-cache.outputs.cache-hit != 'true'
+              run: pnpm run install:backend
+
+            - name: 🏗️ Build application
+              run: pnpm run build-backend
+
+            - name: 🧪 Run unit tests
+              run: pnpm run test:unit:backend
+
+            - name: 🧪 Run integration tests
+              run: pnpm run test:integration:backend
+
+            - name: 🧪 Run e2e tests
+              run: pnpm run test:e2e:backend
+
+            - name: 📊 Generate coverage report
+              run: pnpm run test:cov:backend

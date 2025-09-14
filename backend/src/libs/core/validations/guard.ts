@@ -3,9 +3,9 @@ import { ValidationException } from './validation-exception';
 export class Guard {
   private static readonly allowedCurrency = new Set(['USD', 'EUR', 'GBP', 'JPY', 'CAD']);
   private static readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  private static readonly phoneRegex = /^[+]?[(]?[+]?[0-9]{1,4}[)]?[-\s./0-9]{9,12}$/;
+  private static readonly phoneRegex = /^\+?\(?\+?\d{1,4}\)?[\d\s./-]{9,12}$/;
   private static readonly mobileRegex = /^(?:\+|00)?(\(\d{1,3}\)|\d{1,3})?([1-9]\d{9})$/;
-  private static readonly guidRegex = /^[0]{8}-[0]{4}-[0]{4}-[0]{4}-[0]{12}$/;
+  private static readonly guidRegex = /^0{8}(?:-0{4}){3}-0{12}$/;
 
   static notNull<T>(value: T | null | undefined, argumentName: string = 'value', message: string | null = null): T {
     if (value === null || value === undefined) {

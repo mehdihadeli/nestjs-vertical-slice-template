@@ -8,4 +8,5 @@ export interface IProductRepository {
   softDeleteById(id: string): Promise<boolean>;
   updateProduct(id: string, name?: string, price?: number, description?: string): Promise<Product | null>;
   getByPageAndTotalCount(pageNumber: number, pageSize: number): Promise<{ items: Product[]; totalCount: number }>;
+  restoreById(id: string): Promise<boolean>;
 }

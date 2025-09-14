@@ -66,11 +66,6 @@ export const ProductSchema = new EntitySchema<Product>({
       version: true,
     },
     // Soft-delete
-    isDeleted: {
-      type: Boolean,
-      default: false,
-      name: 'is_deleted',
-    },
     deletedAt: {
       type: Date,
       nullable: true,

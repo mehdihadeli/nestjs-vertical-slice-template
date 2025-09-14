@@ -1,6 +1,7 @@
+import { Injectable } from '@nestjs/common';
+
 import { ProblemDetails } from './problem-details';
 import { getDefaultProblemDetails } from './problem-details-defaults';
-import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ProblemDetailsUtils {
@@ -69,7 +70,7 @@ export class ProblemDetailsUtils {
       type: 'https://tools.ietf.org/html/rfc9110#section-15.5.1',
       title: 'Validation Error',
       detail: detail ?? 'One or more validation errors occurred',
-      errors: errors,
+      errors,
     };
   }
 
@@ -88,7 +89,7 @@ export class ProblemDetailsUtils {
       status: 404,
       type: 'https://tools.ietf.org/html/rfc9110#section-15.5.5',
       title: 'Not Found',
-      detail: detail,
+      detail,
     };
   }
 

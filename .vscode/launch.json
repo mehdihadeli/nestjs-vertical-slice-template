@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Start:Debug",
+      "name": "Start:Dev",
       "request": "launch",
       "runtimeArgs": [
         "run-script",
-        "start:debug"
+        "start:dev"
       ],
       "cwd": "${workspaceFolder}/backend",
       "runtimeExecutable": "npm",
@@ -21,40 +21,6 @@
       ],
       "type": "node",
       "sourceMaps": true
-    },
-    {
-      "name": "Create DB Schema",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/backend",
-      "runtimeArgs": [
-        "run-script",
-        "schema:sync"
-      ],
-      "runtimeExecutable": "npm",
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node"
-    },
-    {
-      "name": "Drop DB",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/backend",
-      "runtimeArgs": [
-        "run-script",
-        "drop:database"
-      ],
-      "runtimeExecutable": "npm",
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node"
     }
   ]
 }

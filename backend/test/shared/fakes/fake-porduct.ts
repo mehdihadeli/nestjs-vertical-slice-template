@@ -15,7 +15,6 @@ export class FakeProduct {
       lastModifiedBy: overrides.lastModifiedBy ?? undefined,
       version: overrides.version ?? 0,
       deletedAt: overrides.deletedAt ?? undefined,
-      isDeleted: overrides.isDeleted ?? false,
     };
   }
 }

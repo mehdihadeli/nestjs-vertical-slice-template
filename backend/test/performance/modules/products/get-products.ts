@@ -1,9 +1,9 @@
-import http, { Response } from 'k6/http';
 import { check } from 'k6';
+import http, { Response } from 'k6/http';
 import { Options } from 'k6/options';
 
 // BASE_URL from the environment variable or default. Use `K6_BASE_URL` in your env or CLI.
-const BASE_URL = __ENV.BASE_URL ?? 'http://localhost:4000';
+const BASE_URL = __ENV.BASE_URL ?? 'http://localhost:5000';
 
 export const options: Options = {
   stages: [
@@ -19,7 +19,7 @@ export const options: Options = {
     // ------
     // Spike
     // { duration: "1m", target: 2000 }, // fast ramp-up to a high point
-    // { duration: "30", target: 0 }, // quick ramp-down to 0 users
+    // { duration: "30", target: 0 }, // quick ramp-down to 0 products
   ],
   thresholds: {
     http_req_failed: [{ threshold: 'rate < 0.01', abortOnFail: true }],
@@ -27,7 +27,7 @@ export const options: Options = {
 };
 
 export default function (): void {
-  const res: Response = http.get(`${BASE_URL}/api/v1/users`);
+  const res: Response = http.get(`${BASE_URL}/api/v1/products`);
 
   check(res, {
     'status is 200': r => r.status === 200,

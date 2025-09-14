@@ -1,6 +1,6 @@
 import { DiagnosticsProvider } from '@libs/opentelemetry/diagnostics-provider';
 import { Logger } from '@nestjs/common';
-import { Context, Span, SpanStatusCode, context, trace } from '@opentelemetry/api';
+import { Context, context, Span, SpanStatusCode, trace } from '@opentelemetry/api';
 import {
   ATTR_EXCEPTION_MESSAGE,
   ATTR_EXCEPTION_STACKTRACE,

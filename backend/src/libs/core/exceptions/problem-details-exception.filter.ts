@@ -1,7 +1,8 @@
 import { ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ProblemDetailsUtils } from './problem-details-utils';
+
 import { DefaultExceptionMapper } from './exception-mapper';
+import { ProblemDetailsUtils } from './problem-details-utils';
 
 @Catch()
 export class ProblemDetailsExceptionFilter implements ExceptionFilter {
