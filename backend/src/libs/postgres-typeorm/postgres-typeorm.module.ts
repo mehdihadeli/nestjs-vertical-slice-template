@@ -87,14 +87,41 @@ export class PostgresTypeormModule {
       };
     }
 
-    // Parse PostgreSQL connection string
+    let finalConnectionString = options.connectionString;
+
+    if (options.dbName) {
+      // using aspire connection string
+      const envVarName = `ConnectionStrings__pg-${options.dbName}db`;
+      const envConnectionString = process.env[envVarName];
+
+      if (envConnectionString) {
+        // Parse the semicolon-separated key-value pairs
+        const params: Record<string, string> = {};
+        envConnectionString.split(';').forEach(part => {
+          const [key, value] = part.split('=');
+          if (key && value) {
+            params[key.trim()] = value.trim();
+          }
+        });
+
+        // Format: postgres://USERNAME:PASSWORD@HOST:PORT/DATABASE
+        const username = params.Username || '';
+        const password = params.Password ? `:${params.Password}` : '';
+        const host = params.Host || 'localhost';
+        const port = params.Port || '5432';
+        const database = params.Database || options.dbName;
+
+        finalConnectionString = `postgres://${username}${password}@${host}:${port}/${database}`;
+      }
+    }
+
     guard.notEmptyOrNull(
-      options.connectionString,
-      'connectionString',
-      'Connection string is required when not using in-memory database',
+      finalConnectionString,
+      'finalConnectionString',
+      'A valid connection string is required. Either provide it directly in options or set the corresponding environment variable (e.g., ConnectionStrings__YourDbName).',
     );
 
-    const url = new URL(options.connectionString);
+    const url = new URL(finalConnectionString);
 
     const dataSourceOptions: DataSourceOptions & SeederOptions = {
       type: 'postgres',

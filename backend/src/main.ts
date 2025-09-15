@@ -18,7 +18,7 @@ const bootstrap = async (): Promise<void> => {
 
   await app.listen(port);
 
-  Logger.log(`🚀 Application is running on port ${port}`);
+  Logger.log(`🚀 Application is running on http://localhost:${port}`);
 };
 
 bootstrap().catch(handleError);

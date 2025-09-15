@@ -10,6 +10,7 @@ export class PostgresOptions {
   entities?: string[];
   factories?: string[];
   seeds?: string[];
+  dbName?: string;
 }
 
 export interface PostgresAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
