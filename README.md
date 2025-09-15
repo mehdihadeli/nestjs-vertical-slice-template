@@ -17,7 +17,7 @@
     - [Format \&\& Lint](#format--lint)
   - [Application Structure](#application-structure)
   - [🏗️ Backend Folder Structure: Vertical Slice Architecture](#️-backend-folder-structure-vertical-slice-architecture)
-    - [🔑 Key Principles](#-key-principles)
+    - [🔑 Key Principles of This Vertical Slice Architecture](#-key-principles-of-this-vertical-slice-architecture)
 
 ## Features
 
@@ -36,7 +36,9 @@
 - ✅ Using **Swagger** and **Api-Versioning** for application apis
 - ✅ Using [Problem Details](/backend/src/libs/core/exceptions) standard for readable details of errors.
 - ✅ Using Docker-Compose for our deployment mechanism.
-- ✅ Using sortable `uuid v7` for Ids
+- ✅ Using sortable **uuid v7** for Ids
+- ✅ Using **Optimistic Conurrency** based on TypeORM concurrency token
+- ✅ Using **Soft Delete** based on TypeORM
 
 ## Technologies - Libraries
 
@@ -44,6 +46,7 @@
 - ✔️ **[`nestjs/nest`](https://github.com/nestjs/nest)** - Nest is a framework for building efficient, scalable Node.js server-side applications
 - ✔️ **[`nestjs/cqrs`](https://github.com/nestjs/cqrs)** - A lightweight CQRS module for Nest framework (node.js)
 - ✔️ **[`nestjs/typeorm`](https://github.com/nestjs/typeorm)** - TypeORM module for Nest
+- ✔️ **[`tada5hi/typeorm-extension`](https://github.com/tada5hi/typeorm-extension)** - This library provides utitlites to create & drop the database, seed the database and apply URL query parameter(s)
 - ✔️ **[`nestjs/swagger`](https://github.com/nestjs/swagger)** - OpenAPI (Swagger) module for Nest
 - ✔️ **[`open-telemetry/opentelemetry-js`](https://github.com/open-telemetry/opentelemetry-js)** - A framework for collecting traces, metrics, and logs from applications
 - ✔️ **[`motdotla/dotenv`](https://github.com/motdotla/dotenv)** - Dotenv is a zero-dependency module that loads environment variables from a .env
@@ -56,6 +59,7 @@
 - ✔️ **[`eslint/eslint`](https://github.com/eslint/eslint)** - ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code
 - ✔️ **[`prettier/prettier`](https://github.com/prettier/prettier)** - Opinionated Code Formatter
 - ✔️ **[`uuidjs/uuid`](https://github.com/uuidjs/uuid)** - Generate RFC-compliant UUIDs in JavaScript
+- ✔️ **[`@fluffy-spoon/substitute`](https://github.com/ffMathy/FluffySpoon.JavaScript.Testing.Faking)** - An NSubstitute port to TypeScript called substitute.js
 
 ## Set up and Start the Infrastructure
 
@@ -144,7 +148,7 @@ In this project, I used [vertical slice architecture](https://jimmybogard.com/ve
 
 Our `backend` is organized using **Vertical Slice Architecture** — where each feature (use case) is a self-contained, end-to-end slice spanning controller, DTO, handler, and data access. This ensures **high cohesion, low coupling**, and easy maintainability.
 
-```
+```bash
 backend/
 ├── 📄 .editorconfig
 ├── 📄 .eslintignore
@@ -184,12 +188,12 @@ backend/
 │       │
 │       └── 📁 modules/
 │           │
-│           ├── 🟢 health/
+│           ├── 📁 health/
 │           │   ├── 📄 health.module.ts          # 🏗️ Module declaring the health endpoint — simple, no vertical slice needed
 │           │   └── 📁 health/
 │           │       └── 📄 health.controller.ts  # 🌐 HTTP endpoint: GET /health → returns { status: 'ok' }
 │           │
-│           ├── 🟡 products/                     # 🔹 BOUNDED CONTEXT: Product Management — VERTICAL SLICES HERE
+│           ├── 📁 products/                     # 🔹 BOUNDED CONTEXT: Product Management — VERTICAL SLICES HERE
 │           │   ├── 📄 products.module.ts        # 🧩 Module exports controllers, handlers, repositories — context glue
 │           │   ├── 📄 products.mapper.ts        # 🔄 Optional: Maps DTO ↔ Entity (ClassTransformer)
 │           │   ├── 📄 products.tokens.ts        # 💡 DI tokens: e.g., `InjectionToken<ProductRepository>`
@@ -209,7 +213,7 @@ backend/
 │           │   ├── 📁 entities/                 # 🧬 DOMAIN MODELS — Business objects mapped to DB
 │           │   │   └── 📄 product.entity.ts     # 📂 TypeORM entity — represents Product in domain
 │           │   │
-│           │   └── 📁 features/                 # ✅✅✅ VERTICAL SLICES — ONE FOLDER PER USE CASE
+│           │   └── 📁 features/                 # ✅ VERTICAL SLICES — ONE FOLDER PER USE CASE
 │           │       │
 │           │       ├── 📁 create-product/       # 🎯 Use Case: Create a new product
 │           │       │   ├── 📄 create-product.controller.ts   # 🌐 HTTP entry point (POST /products)
@@ -223,7 +227,7 @@ backend/
 │           │           ├── 📄 get-products-by-page.controller.ts
 │           │           └── 📄 get-products-by-page.handler.ts
 │           │
-│           └── 🟣 shared/
+│           └── 📁 shared/
 │               └── 📄 shared.module.ts          # 🔗 Shared guards, interceptors, pipes used across contexts (e.g., AuthGuard)
 │
 ├── 📁 database/                                 # 🗃️ DATABASE & PERSISTENCE LAYER (separated from business logic)
@@ -249,41 +253,11 @@ backend/
 │   ├── 📁 versioning/                           # 🔢 API versioning strategy: header/path-based routing
 │   └── 📁 web/                                  # 🌐 HTTP middleware: CORS, response time, compression, security
 │
-└── 📁 test/                                     # 🧪 TESTING LAYER — Organized by test type
-    ├── 📁 e2e-tests/                            # 🌐 End-to-end: Full HTTP stack (supertest)
-    │   └── 📁 modules/
-    │       └── 📁 products/
-    │           └── 📁 features/
-    │               └── 📄 create-product.test.ts # ✅ Tests POST /products → expects 201 + correct response
-    │
-    ├── 📁 integration-tests/                    # 🔗 Integration: Use case + real DB/repo (no HTTP)
-    │   └── 📁 modules/
-    │       └── 📁 products/
-    │           ├── 📄 product-repository.test.ts # ✅ Tests if repo saves/fetches correctly from DB
-    │           └── 📁 features/
-    │               ├── 📄 create-product-handler.test.ts
-    │               ├── 📄 get-product-by-id.test.ts
-    │               └── 📄 get-products-by-page.handler.test.ts
-    │
-    ├── 📁 performance/                          # ⚡ Performance: Load testing (optional)
-    │   └── 📁 modules/
-    │       └── 📁 products/
-    │           └── 📄 get-products.ts
-    │
-    ├── 📁 shared/                               # 🧰 Shared test utilities
-    │   ├── 📄 app-shared-fixture.ts             # 🧩 Setup/teardown for test apps
-    │   └── 📁 fakes/
-    │       ├── 📄 fake-create-product-request.dto.ts
-    │       └── 📄 fake-product.ts
-    │
-    └── 📁 unit-tests/                           # 🔬 Unit: Pure logic — mocked dependencies
-        └── 📁 modules/
-            └── 📁 products/
-                ├── 📄 products.mapper.test.ts   # ✅ Tests mapping logic in isolation
-                └── 📁 features/
-                    ├── 📄 create-product.test.ts
-                    ├── 📄 get-product-by-id.test.ts
-                    └── 📄 get-products-by-page.test.ts
+└───📁 test/
+    ├───📁 e2e-tests/                                # End-to-end API tests (HTTP level)
+    ├───📁 integration-tests/                        # Feature-level tests (with real DB/repo)
+    ├───📁 shared/                                   # Common test utilities & fakes
+    └───📁 unit-tests/                               # Pure unit tests (isolated handlers/services)
 ```
 
 ### 🔑 Key Principles of This Vertical Slice Architecture
@@ -299,10 +273,11 @@ backend/
 
 - **✅ Test-Driven by Slice**:  
   Every vertical slice has a matching test suite:
-    - Unit tests → `test/unit-tests/modules/[context]/features/[feature].test.ts`
-    - Integration tests → `test/integration-tests/modules/[context]/features/[feature].test.ts`
-    - E2E tests → `test/e2e-tests/modules/[context]/features/[feature].test.ts`  
-      Tests mirror the feature structure — ensuring full coverage and fast feedback loops.
+
+  - Unit tests → `test/unit-tests/modules/[context]/features/[feature].test.ts`
+  - Integration tests → `test/integration-tests/modules/[context]/features/[feature].test.ts`
+  - E2E tests → `test/e2e-tests/modules/[context]/features/[feature].test.ts`  
+     Tests mirror the feature structure — ensuring full coverage and fast feedback loops.
 
 - **✅ No Layered Folders**:  
   There are **no global folders** like `controllers/`, `services/`, `dtos/`, or `repositories/` spanning the entire app. All artifacts are **scoped within their context and feature**. This eliminates confusion, prevents “layer creep”, and enforces cohesion.
