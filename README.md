@@ -1,5 +1,7 @@
 # NestJs Vertical Slice Template
 
+[![Backend CI Pipeline](https://github.com/mehdihadeli/nestjs-vertical-slice-template/actions/workflows/ci.yml/badge.svg)](https://github.com/mehdihadeli/nestjs-vertical-slice-template/actions/workflows/ci.yml)
+
 > 💡 A practical api sample based on Vertical Slice Architecture, NestJs, TypeORM and OpenTelemetry.
 
 ## Table of Contents
@@ -15,6 +17,7 @@
     - [Run tests](#run-tests)
     - [Build Project](#build-project)
     - [Format \&\& Lint](#format--lint)
+  - [Using Aspire](#using-aspire)
   - [Application Structure](#application-structure)
   - [🏗️ Backend Folder Structure: Vertical Slice Architecture](#️-backend-folder-structure-vertical-slice-architecture)
     - [🔑 Key Principles of This Vertical Slice Architecture](#-key-principles-of-this-vertical-slice-architecture)
