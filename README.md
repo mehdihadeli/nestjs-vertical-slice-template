@@ -39,6 +39,7 @@
 - ✅ Using sortable **uuid v7** for Ids
 - ✅ Using **Optimistic Conurrency** based on TypeORM concurrency token
 - ✅ Using **Soft Delete** based on TypeORM
+- ✅ Integration **Aspire** for hosting application
 
 ## Technologies - Libraries
 
@@ -129,6 +130,23 @@ pnpm run lint:fix:backend
 # lint backend
 pnpm run lint:backend
 ```
+
+## Using Aspire
+
+Install the [`Aspire CLI`](https://learn.microsoft.com/en-us/dotnet/aspire/cli/install?tabs=windows) tool:
+
+```bash
+# Bash
+dotnet tool install -g Aspire.Cli
+```
+
+To run the application using the `Aspire App Host` and using Aspire dashboard in the development mode run following command:
+
+```bash
+aspire run
+```
+
+After running the command, `Aspire dashboard` will be available with all application components.
 
 ## Application Structure
 
