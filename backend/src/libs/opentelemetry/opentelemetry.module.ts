@@ -19,6 +19,15 @@ import { defaultResource, resourceFromAttributes } from '@opentelemetry/resource
 import { logs, metrics, NodeSDK, tracing } from '@opentelemetry/sdk-node';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
+type OtlpProtocol = 'grpc' | 'http/protobuf' | 'http/json';
+
+interface OtlpEnvConfig {
+  endpoint?: string;
+  protocol?: OtlpProtocol;
+  headers?: Record<string, string>;
+  serviceName?: string;
+}
+
 @Global()
 @Module({})
 export class OpenTelemetryModule implements OnModuleInit {
@@ -89,6 +98,27 @@ export class OpenTelemetryModule implements OnModuleInit {
   }
 
   private static getMetricExporter(otelOptions: OpenTelemetryOptions): metrics.PushMetricExporter {
+    // AddProject --> WithProjectDefaults--> WithOtlpExporter: Injects the appropriate environment variables to allow
+    // sending telemetry to the dashboard.
+    // It sets the OTLP endpoint (OTEL_EXPORTER_OTLP_ENDPOINT) to the value of the `ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL`
+    // environment variable with a default value of `http://localhost:18889`.
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/OtlpConfigurationExtensions.cs#L187
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/ProjectResourceBuilderExtensions.cs#L308
+    const envConfig = this.getOtlpConfigFromEnv();
+
+    if (envConfig.endpoint) {
+      const exporterConfig = {
+        url: envConfig.endpoint,
+        // We don't set 'headers' manually here. SDK handles it through `OTEL_EXPORTER_OTLP_HEADERS` env
+      };
+
+      if (envConfig.protocol === 'grpc') {
+        return new OTLGrpcMetricExporter(exporterConfig);
+      } else {
+        return new OTLPHttpMetricExporter(exporterConfig);
+      }
+    }
+
     if (
       otelOptions.openTelemetryCollectorOptions?.enabled &&
       otelOptions.openTelemetryCollectorOptions.otlpGrpcExporterEndpoint
@@ -121,6 +151,31 @@ export class OpenTelemetryModule implements OnModuleInit {
 
   private static getLogProcessors(otelOptions: OpenTelemetryOptions): logs.LogRecordProcessor[] {
     const logProcessors: logs.LogRecordProcessor[] = [];
+
+    // AddProject --> WithProjectDefaults--> WithOtlpExporter: Injects the appropriate environment variables to allow
+    // sending telemetry to the dashboard.
+    // It sets the OTLP endpoint (OTEL_EXPORTER_OTLP_ENDPOINT) to the value of the `ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL`
+    // environment variable with a default value of `http://localhost:18889`.
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/OtlpConfigurationExtensions.cs#L187
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/ProjectResourceBuilderExtensions.cs#L308
+    const envConfig = this.getOtlpConfigFromEnv();
+    console.log('envConfig', envConfig);
+
+    if (envConfig.endpoint) {
+      const exporterConfig = {
+        url: envConfig.endpoint,
+        // We don't set 'headers' manually here. SDK handles it through `OTEL_EXPORTER_OTLP_HEADERS` env
+      };
+
+      let exporter;
+      if (envConfig.protocol === 'grpc') {
+        exporter = new OTLPGrpcLogExporter(exporterConfig);
+      } else {
+        exporter = new OTLPHttpLogExporter(exporterConfig);
+      }
+
+      logProcessors.push(new logs.SimpleLogRecordProcessor(exporter));
+    }
 
     if (
       otelOptions.openTelemetryCollectorOptions?.enabled &&
@@ -171,6 +226,30 @@ export class OpenTelemetryModule implements OnModuleInit {
   private static getSpanProcessors(otelOptions: OpenTelemetryOptions): tracing.SpanProcessor[] {
     const spanProcessors: tracing.SpanProcessor[] = [];
 
+    // AddProject --> WithProjectDefaults--> WithOtlpExporter: Injects the appropriate environment variables to allow
+    // sending telemetry to the dashboard.
+    // It sets the OTLP endpoint (OTEL_EXPORTER_OTLP_ENDPOINT) to the value of the `ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL`
+    // environment variable with a default value of `http://localhost:18889`.
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/OtlpConfigurationExtensions.cs#L187
+    // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/ProjectResourceBuilderExtensions.cs#L308
+    const envConfig = this.getOtlpConfigFromEnv();
+
+    if (envConfig.endpoint) {
+      const exporterConfig = {
+        url: envConfig.endpoint,
+        // We don't set 'headers' manually here. SDK handles it through `OTEL_EXPORTER_OTLP_HEADERS` env
+      };
+
+      let exporter;
+      if (envConfig.protocol === 'grpc') {
+        exporter = new OTLPGrpcTraceExporter(exporterConfig);
+      } else {
+        exporter = new OTLPHttpTraceExporter(exporterConfig);
+      }
+
+      spanProcessors.push(new tracing.BatchSpanProcessor(exporter));
+    }
+
     if (otelOptions.useConsoleExporter) {
       spanProcessors.push(new tracing.BatchSpanProcessor(new tracing.ConsoleSpanExporter()));
     }
@@ -216,6 +295,54 @@ export class OpenTelemetryModule implements OnModuleInit {
       );
     }
     return spanProcessors;
+  }
+
+  private static parseOtlpProtocol(protocolString: string | undefined): OtlpProtocol | undefined {
+    if (!protocolString) return undefined;
+    const normalized = protocolString.trim().toLowerCase();
+    if (normalized === 'grpc' || normalized === 'http/protobuf' || normalized === 'http/json') {
+      return normalized;
+    }
+    return undefined;
+  }
+
+  private static parseOtlpHeaders(headersString: string | undefined): Record<string, string> | undefined {
+    if (!headersString) return undefined;
+
+    try {
+      return headersString
+        .split(',')
+        .map(part => part.trim())
+        .filter(part => part.length > 0)
+        .reduce(
+          (acc, header) => {
+            const separatorIndex = header.indexOf('=');
+            if (separatorIndex === -1) {
+              // Skip malformed headers without '='
+              return acc;
+            }
+            const key = header.substring(0, separatorIndex).trim();
+            const value = header.substring(separatorIndex + 1).trim();
+            if (key) {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
+    } catch (error) {
+      console.warn('Failed to parse OTEL_EXPORTER_OTLP_HEADERS:', error);
+      return undefined;
+    }
+  }
+
+  private static getOtlpConfigFromEnv(): OtlpEnvConfig {
+    return {
+      endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.trim(),
+      protocol: this.parseOtlpProtocol(process.env.OTEL_EXPORTER_OTLP_PROTOCOL),
+      headers: this.parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
+      serviceName: process.env.OTEL_SERVICE_NAME?.trim(),
+    };
   }
 
   onModuleInit(): any {
