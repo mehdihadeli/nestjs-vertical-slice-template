@@ -1,6 +1,6 @@
 using Humanizer;
 
-namespace aspire.AppHost;
+namespace Aspire.AppHost;
 
 public class AspireApplicationResources
 {

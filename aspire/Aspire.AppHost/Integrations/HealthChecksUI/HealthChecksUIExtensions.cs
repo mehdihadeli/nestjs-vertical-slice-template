@@ -1,6 +1,6 @@
 using Aspire.Hosting.Lifecycle;
 
-namespace aspire.AppHost.Integrations.HealthChecksUI;
+namespace Aspire.AppHost.Integrations.HealthChecksUI;
 
 // ref: https://github.com/dotnet/aspire-samples/tree/main/samples/HealthChecksUI
 public static class HealthChecksUIExtensions

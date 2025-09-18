@@ -159,7 +159,6 @@ export class OpenTelemetryModule implements OnModuleInit {
     // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/OtlpConfigurationExtensions.cs#L187
     // https://github.com/dotnet/aspire/blob/5be4f73b7dfb0d1665d73bd96434295e268a0453/src/Aspire.Hosting/ProjectResourceBuilderExtensions.cs#L308
     const envConfig = this.getOtlpConfigFromEnv();
-    console.log('envConfig', envConfig);
 
     if (envConfig.endpoint) {
       const exporterConfig = {
@@ -174,7 +173,7 @@ export class OpenTelemetryModule implements OnModuleInit {
         exporter = new OTLPHttpLogExporter(exporterConfig);
       }
 
-      logProcessors.push(new logs.SimpleLogRecordProcessor(exporter));
+      logProcessors.push(new logs.BatchLogRecordProcessor(exporter));
     }
 
     if (
@@ -182,7 +181,7 @@ export class OpenTelemetryModule implements OnModuleInit {
       otelOptions.openTelemetryCollectorOptions.otlpHttpExporterEndpoint
     ) {
       logProcessors.push(
-        new logs.SimpleLogRecordProcessor(
+        new logs.BatchLogRecordProcessor(
           new OTLPHttpLogExporter({
             url: otelOptions.openTelemetryCollectorOptions.otlpHttpExporterEndpoint,
           }),
@@ -195,7 +194,7 @@ export class OpenTelemetryModule implements OnModuleInit {
       otelOptions.openTelemetryCollectorOptions.otlpGrpcExporterEndpoint
     ) {
       logProcessors.push(
-        new logs.SimpleLogRecordProcessor(
+        new logs.BatchLogRecordProcessor(
           new OTLPGrpcLogExporter({
             url: otelOptions.openTelemetryCollectorOptions.otlpGrpcExporterEndpoint,
           }),
@@ -208,7 +207,7 @@ export class OpenTelemetryModule implements OnModuleInit {
       otelOptions.aspireDashboardOTLPOptions?.otlpGrpcExporterEndpoint
     ) {
       logProcessors.push(
-        new logs.SimpleLogRecordProcessor(
+        new logs.BatchLogRecordProcessor(
           new OTLPGrpcLogExporter({
             url: otelOptions.aspireDashboardOTLPOptions?.otlpGrpcExporterEndpoint,
           }),
@@ -217,7 +216,7 @@ export class OpenTelemetryModule implements OnModuleInit {
     }
 
     if (otelOptions.useConsoleExporter) {
-      logProcessors.push(new logs.SimpleLogRecordProcessor(new logs.ConsoleLogRecordExporter()));
+      logProcessors.push(new logs.BatchLogRecordProcessor(new logs.ConsoleLogRecordExporter()));
     }
 
     return logProcessors;

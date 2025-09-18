@@ -1,19 +1,19 @@
-using aspire.AppHost;
-using aspire.AppHost.AspireIntegrations;
-using aspire.AppHost.Extensions;
+using Aspire.AppHost;
+using Aspire.AppHost.AspireIntegrations.Grafana;
+using Aspire.AppHost.AspireIntegrations.Loki;
+using Aspire.AppHost.AspireIntegrations.OpenTelemetryCollector;
+using Aspire.AppHost.AspireIntegrations.Postgres;
+using Aspire.AppHost.AspireIntegrations.Prometheus;
+using Aspire.AppHost.AspireIntegrations.Tempo;
+using Aspire.AppHost.Extensions;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 var appHostLaunchProfile = builder.GetLaunchProfileName();
 Console.WriteLine($"AppHost LaunchProfile is: {appHostLaunchProfile}");
 
-var pgUser = builder.AddParameter("pg-user", value: "postgres", publishValueAsDefault: true);
-var pgPassword = builder.AddParameter(name: "pg-password", value: new GenerateParameterDefault { MinLength = 3 }, true);
-
 var postgres = builder.AddAspirePostgres(
     AspireResources.Postgres,
-    userName: pgUser,
-    password: pgPassword,
     initScriptPath: "./../../deployments/configs/init-postgres.sql"
 );
 var foodPostgres = postgres.AddAspirePostgresDatabase(
@@ -21,8 +21,37 @@ var foodPostgres = postgres.AddAspirePostgresDatabase(
     databaseName: nameof(AspireApplicationResources.PostgresDatabase.Foods).ToLowerInvariant()
 );
 
+var prometheus = builder.AddAspirePrometheus(
+    AspireResources.Prometheus,
+    configBindMountPath: "./../../deployments/configs/prometheus.yaml"
+);
+var loki = builder.AddAspireLoki(
+    AspireResources.Loki,
+    configBindMountPath: "./../../deployments/configs/loki-config.yaml"
+);
+var tempo = builder.AddAspireTempo(
+    AspireResources.Tempo,
+    configBindMountPath: "./../../deployments/configs/tempo.yaml"
+);
+
+var otelCollector = builder.AddAspireOpenTelemetryCollector(
+    nameOrConnectionStringName: AspireResources.OpenTelemetryCollector,
+    configBindMountPath: "./../../deployments/configs/otel-collector-config.yaml",
+    waitForDependencies: [ prometheus, loki, tempo]
+);
+
+var grafana = builder.AddAspireGrafana(
+    AspireResources.Grafana,
+    provisioningPath: "./../../deployments/configs/grafana/provisioning",
+    dashboardsPath: "./../../deployments/configs/grafana/dashboards",
+    waitForDependencies: [prometheus, loki, tempo]
+);
+
 var foodApi = builder.AddNpmApp(AspireApplicationResources.Api.FoodApi, "../../backend", "start:dev")
+    .WaitFor(foodPostgres)
     .WithReference(foodPostgres)
+    .WithReference(otelCollector)
+    .WaitFor(otelCollector)
     .WithEnvironment("BROWSER", "none")
     .WithEnvironment("NODE_ENV", "development")
     .WithHttpEndpoint(env: "APP_OPTIONS__PORT")

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Aspire.Hosting.Lifecycle;
 
-namespace aspire.AppHost.Integrations.HealthChecksUI;
+namespace Aspire.AppHost.Integrations.HealthChecksUI;
 
 /// <summary>
 /// A container-based resource for the HealthChecksUI container.

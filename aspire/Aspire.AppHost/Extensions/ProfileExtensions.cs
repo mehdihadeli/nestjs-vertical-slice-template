@@ -1,4 +1,4 @@
-namespace aspire.AppHost.Extensions;
+namespace Aspire.AppHost.Extensions;
 
 public static class ProfileExtensions
 {

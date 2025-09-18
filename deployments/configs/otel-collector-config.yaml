@@ -62,15 +62,15 @@ exporters:
 
   # Prometheus exporter metrics
   prometheus:
-    endpoint: ${env:PROMETHEUS_ENDPOINT:-"0.0.0.0:8889"}
+    endpoint: ${env:PROMETHEUS_ENDPOINT:-0.0.0.0:8889}
 
   prometheusremotewrite:
-    endpoint: ${env:PROMETHEUS_REMOTE_WRITE_ENDPOINT:-"http://prometheus:9090/api/v1/write"}
+    endpoint: ${env:PROMETHEUS_REMOTE_WRITE_ENDPOINT:-http://prometheus:9090/api/v1/write}
 
   # https://grafana.com/docs/loki/latest/send-data/otel/
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/lokiexporter/README.md
   otlphttp/loki:
-    endpoint: ${env:LOKI_ENDPOINT:-"http://loki:3100/otlp"}
+    endpoint: ${env:LOKI_ENDPOINT:-http://loki:3100/otlp}
     tls:
       insecure: true
       #  # we can also use `loki component` from `opentelemetry-collector-contrib` if we don't want to use builtin `otlphttp` exporter type and `http://loki:3100/otlp` loki endpoint
@@ -80,18 +80,9 @@ exporters:
       #      insecure: true
 
   otlp/tempo:
-    endpoint: ${env:TEMPO_ENDPOINT:-"http://tempo:4317"}
+    endpoint: ${env:TEMPO_ENDPOINT:-http://tempo:4317}
     tls:
       insecure: true
-
-  # export telemetry data to aspire dashboard
-  otlp/aspire:
-    endpoint: ${env:ASPIRE_OTLP_ENDPOINT}
-    headers:
-      x-otlp-api-key: ${env:ASPIRE_API_KEY}
-    tls:
-      insecure: true
-      insecure_skip_verify: true # Required in local development because cert is localhost and the endpoint is host.docker.internal
 
 # https://opentelemetry.io/docs/collector/configuration/#extensions
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md
@@ -120,12 +111,12 @@ service:
       receivers: [ otlp ]
       processors: [ batch ]
       # https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
-      exporters: [ debug, otlp/tempo, otlp/aspire ]
+      exporters: [ debug, otlp/tempo ]
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ debug, prometheusremotewrite, prometheus, otlp/aspire ]
+      exporters: [ debug, prometheusremotewrite, prometheus ]
     logs:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ otlphttp/loki, otlp/aspire ]
+      exporters: [ otlphttp/loki ]

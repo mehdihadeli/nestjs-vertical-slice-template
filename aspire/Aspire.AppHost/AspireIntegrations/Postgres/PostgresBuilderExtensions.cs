@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace aspire.AppHost.AspireIntegrations;
+namespace Aspire.AppHost.AspireIntegrations.Postgres;
 
 [Experimental("ASPIREPROXYENDPOINTS001")]
 public static class PostgresBuilderExtensions
